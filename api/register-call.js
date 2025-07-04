@@ -21,9 +21,6 @@ module.exports = async (req, res) => {
       sample_rate: parseInt(process.env.RETELL_SAMPLE_RATE || '48000'),
     });
 
-    // Log the response from Retell to inspect it in Vercel logs
-    console.log('Response from Retell API:', JSON.stringify(registerCallResponse, null, 2));
-
     // Send the successful response back to the frontend.
     res.status(200).json(registerCallResponse);
 
