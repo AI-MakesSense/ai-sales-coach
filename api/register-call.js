@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
     });
 
     // Register a new call. The agent ID is also from environment variables.
-    const registerCallResponse = await retellClient.call.register({
+    const registerCallResponse = await retellClient.call.createWebCall({
       agent_id: process.env.REACT_APP_RETELL_AGENTID,
       audio_encoding: 's16le',
       audio_websocket_protocol: 'web',
