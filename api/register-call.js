@@ -1,45 +1,31 @@
-const fetch = require('node-fetch');
+const { Retell } = require('retell-sdk');
 
-export default async function handler(req, res) {
-  const { agentId } = req.body;
-  const apiKey = process.env.RETELL_API;
-  const sampleRate = parseInt(process.env.RETELL_SAMPLE_RATE || '16000', 10);
-
-  console.log('Using Agent ID:', agentId);
-  console.log('API Key (first 4 chars):', apiKey.substring(0, 4));
-  console.log('Sample Rate:', sampleRate);
+// This function is the serverless function handler for Vercel.
+module.exports = async (req, res) => {
+  // Ensure this is a POST request.
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
   try {
-    const response = await fetch('https://api.retellai.com/v2/create-web-call', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        agent_id: agentId
-      }),
+    // Initialize Retell client with the API key from environment variables.
+    const retellClient = new Retell({
+      apiKey: process.env.RETELL_API,
     });
 
-    console.log('Response status:', response.status);
-    console.log('Response headers:', response.headers.raw());
-
-    const text = await response.text();
-    console.log('Response body:', text);
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${text}`);
-    }
-
-    const data = JSON.parse(text);
-
-    res.status(200).json({
-      callId: data.call_id,
-      accessToken: data.access_token,
-      sampleRate: sampleRate
+    // Register a new call. The agent ID is also from environment variables.
+    const registerCallResponse = await retellClient.call.register({
+      agent_id: process.env.REACT_APP_RETELL_AGENTID,
+      audio_encoding: 's16le',
+      audio_websocket_protocol: 'web',
+      sample_rate: parseInt(process.env.RETELL_SAMPLE_RATE || '48000'),
     });
+
+    // Send the successful response back to the frontend.
+    res.status(200).json(registerCallResponse);
+
   } catch (error) {
     console.error('Error registering call:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to register call.' });
   }
-}
+};
