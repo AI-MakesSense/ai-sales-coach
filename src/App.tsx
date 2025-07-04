@@ -9,7 +9,7 @@ const agentId = process.env.REACT_APP_RETELL_AGENTID;
 // Define the expected response structure from our backend's /register-call endpoint.
 // It should contain the access token required by the RetellWebClient to start a call.
 interface RegisterCallResponse {
-  accessToken?: string;
+  access_token?: string;
   sampleRate: number;
 }
 
@@ -86,10 +86,10 @@ const App = () => {
       try {
         // Register the call with our backend to get an access token.
         const registerCallResponse = await registerCall(agentId);
-        if (registerCallResponse.accessToken) {
+        if (registerCallResponse.access_token) {
           // Use the access token to start the call.
           await webClient.startCall({
-            accessToken: registerCallResponse.accessToken,
+            accessToken: registerCallResponse.access_token,
             sampleRate: registerCallResponse.sampleRate,
           });
           console.log("Starting call...");
